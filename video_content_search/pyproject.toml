@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "video-content-search"
+version = "1.0.0"
+description = ""
+authors = ["Sunshine"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+langchain = "^0.3.7"
+langchain-core = "^0.3.15"
+pytubefix = "^8.3.0"
+pydub = "^0.25.1"
+openai-whisper = {git = "https://github.com/openai/whisper.git"}
+langchain-community = "^0.3.7"
+pymilvus = "^2.4.9"
+sentence-transformers = "^3.3.0"
+langchain-milvus = "^0.1.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,6 @@
+*.db*
+**/dist/
+data/*
+*.DS_Store*
+.idea
+*.pyc
