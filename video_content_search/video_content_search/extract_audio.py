@@ -5,12 +5,11 @@ from pytubefix.cli import on_progress
 
 
 def download_audio(youtube_url, output_path='.'):
-    yt = YouTube(youtube_url, on_progress_callback = on_progress)
+    yt = YouTube(youtube_url, on_progress_callback=on_progress)
     ys = yt.streams.get_audio_only()
 
     audio_file = ys.download(output_path, mp3=True)
     print(f"Audio downloaded successfully as: {audio_file}")
-
 
 
 def main():

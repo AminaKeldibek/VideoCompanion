@@ -14,18 +14,25 @@ class VectorStore(ABC):
 
     @abstractmethod
     def add_documents(self, documents: List[Document]):
+        """Adds documents in vector database."""
         pass
 
     @abstractmethod
     def delete_vectors(self, ids: List[str]):
+        """Delete vectors from vector store by ids."""
         pass
 
     @abstractmethod
     def delete_vector_store(self):
+        """Delete entire instance of vector database."""
         pass
 
     @abstractmethod
     def search_similar(self, query: str) -> List[Tuple[Document, float]]:
+        """Returns similar vectors for input query.Each result is a list of tuple:
+            Document: contains page_content and metadata
+            Similarity Score
+        """
         pass
 
 
@@ -36,37 +43,36 @@ class MilvusVectorStore(VectorStore):
 
     def __init__(self):
         embedding_model = SentenceTransformerEmbeddings(model_name=self.EMBEDDING_MODEL_NAME)
-
         self.vector_store = Milvus(
             embedding_function=embedding_model,
             connection_args={"uri": self.URI},
         )
 
-        self.retriever = self.vector_store.as_retriever(
-            search_type="mmr", search_kwargs={"k": 10, "fetch_k": 10}
-        )
-
     def add_documents(self, documents: List[Document]):
-        """Change this logic to make sure that ids are unique."""
-        video_id = '111xyz'
+        """Adds documents in vector database.
+        TODO: store ids separately."""
+        video_id = "abc_123"
         uuids = [f"{video_id}_{str(uuid4())}" for _ in range(len(documents))]
 
         try:
             self.vector_store.add_documents(documents=documents, ids=uuids)
-            print("Documents added successfully.")
+            print("Documents are added successfully!")
         except Exception as e:
-            print(f"Error adding documents: {e}")
+            print("Failed to add documents: {e}")
 
     def delete_vectors(self, ids: List[str]):
+        """Delete vectors from vector store by ids."""
         self.vector_store.delete(ids=ids)
 
     def delete_vector_store(self):
+        """Delete entire instance of vector database."""
         os.remove(self.URI)
+        print("Database is deleted successfully!")
 
     def search_similar(self, query: str) -> List[Tuple[Document, float]]:
-        """Each result is a list of tuple:
-        Document: contains page_content and metadata
-        Similarity Score
+        """Returns similar vectors for input query.Each result is a list of tuple:
+            Document: contains page_content and metadata
+            Similarity Score
         """
         return self.vector_store.similarity_search_with_score(query)
 

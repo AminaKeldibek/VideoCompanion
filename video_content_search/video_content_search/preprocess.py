@@ -8,13 +8,12 @@ from pathlib import Path
 def concatenate_segments(segments: List[Dict['str', Any]], concat_size: int) -> List[Dict[str, Any]]:
     """Concatenates transcription segments into bigger text segments of concat_size."""
     concatenated_segments = []
-    num_segments = len(segments)
 
-    for i in range(math.ceil(num_segments / concat_size)):
+    for i in range(math.ceil(len(segments) / concat_size)):
         output = {}
 
         start_idx = i * concat_size
-        end_idx = min(start_idx + concat_size, num_segments)
+        end_idx = min(start_idx + concat_size, len(segments))
 
         output['text'] = ' '.join([segment['text'] for segment in segments[start_idx: end_idx]])
         output['start'] = min([segment['start'] for segment in segments[start_idx: end_idx]])
