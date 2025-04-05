@@ -11,7 +11,7 @@ from video_content_search.search.vector_store import MilvusVectorStore
 app = FastAPI()
 vector_store = MilvusVectorStore()
 
-# Allow CORS for your frontend (localhost in this case)
+# Allow CORS for your frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -30,11 +30,11 @@ class SearchRequest(BaseModel):
     user_id: Optional[str] = Field(None, description='user_id', example='123abc')
 
 
-def search_video_for_timestamp(video_id: str, query: str) -> Optional[int]:
+def search_video_for_timestamp(video_id: str, query: str) -> float:
     try:
         result = retrieve_logic.search_timestamp(vector_store, query)
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print("Couldn't query vector database")
         return None
 
     return result.get('timestamp')
@@ -42,11 +42,10 @@ def search_video_for_timestamp(video_id: str, query: str) -> Optional[int]:
 
 @app.post("/search_video")
 async def search_video(data: SearchRequest):
-    print(f"Received videoId: {data.video_id}, query: {data.query}, userId: {data.user_id}")
     timestamp = search_video_for_timestamp(data.video_id, data.query)
 
     if timestamp is None:
-        raise HTTPException(status_code=404, detail="Timestamp not found for the given query")
+        raise HTTPException(status_code=404, detail='Timestamp not found for the given query')
 
     return {
         "video_id": data.video_id,
