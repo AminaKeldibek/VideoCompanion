@@ -17,7 +17,15 @@ pymilvus = "^2.4.9"
 sentence-transformers = "^3.3.0"
 langchain-milvus = "^0.1.7"
 pytest = "^8.3.4"
+google-genai = "^1.9.0"
+opencv-python = "^4.11.0.86"
+moviepy = "^2.1.2"
+matplotlib = "^3.10.1"
+weaviate-client = {version = "^4.13.2", allow-prereleases = true}
 
+
+[tool.poetry.group.dev.dependencies]
+jupyterlab = "^4.4.0"
 
 [build-system]
 requires = ["poetry-core"]

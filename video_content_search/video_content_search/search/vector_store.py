@@ -1,10 +1,12 @@
-from langchain.embeddings import SentenceTransformerEmbeddings
-from langchain_milvus import Milvus
 from abc import ABC, abstractmethod
-from langchain_core.documents.base import Document
+import os
 from typing import List, Tuple
 from uuid import uuid4
-import os
+
+
+from langchain.embeddings import SentenceTransformerEmbeddings
+from langchain_milvus import Milvus
+from langchain_core.documents.base import Document
 
 
 class VectorStore(ABC):
@@ -75,4 +77,3 @@ class MilvusVectorStore(VectorStore):
             Similarity Score
         """
         return self.vector_store.similarity_search_with_score(query)
-

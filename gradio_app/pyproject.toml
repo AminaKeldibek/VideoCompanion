@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "gradio-app"
+version = "0.1.0"
+description = ""
+authors = ["AminaKeldibek <amina.keldibek@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+gradio = "^5.29.1"
+video-content-search = {path = "../video_content_search"}
+soundfile = "^0.13.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

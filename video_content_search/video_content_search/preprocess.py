@@ -1,8 +1,14 @@
+import base64
 import json
 import math
-from typing import Any, Dict, List
-from langchain.docstore.document import Document
+import os
+import io
 from pathlib import Path
+from typing import Any, Dict, List
+
+from pydub import AudioSegment
+from langchain.docstore.document import Document
+import pandas as pd
 
 
 def concatenate_segments(segments: List[Dict['str', Any]], concat_size: int) -> List[Dict[str, Any]]:
@@ -39,18 +45,93 @@ def load_documents(segments: List[Dict['str', Any]]) -> List[Document]:
     return docs
 
 
-def create_documents(transcript_file: Path) -> List[Document]:
-    with open(transcript_file, 'r') as fi:
+def chunk_transcript(transcription_path: Path):
+    with open(transcription_path, 'r') as fi:
         transcription = json.load(fi)
 
+    concat_sizes = [3, 5, 20, 30]
     segments = []
-    docs = []
-    concat_sizes = [3, 5, 20, 50]
+    concat_segments = []
 
     for segment in transcription['segments']:
         segments.append({k: segment[k] for k in ('text', 'start', 'end')})
 
     for concat_size in concat_sizes:
-        docs += load_documents(concatenate_segments(segments, concat_size=concat_size))
+        concat_segments += concatenate_segments(segments, concat_size=concat_size)
 
+    return concat_segments
+
+
+def create_documents(transcription_path: Path) -> List[Document]:
+    docs = []
+    chunks = chunk_transcript(transcription_path)
+    for c in chunks:
+        docs += load_documents(c)
     return docs
+
+
+def format_text_chunks(chunks: List[Dict[str, Any]], video_id: str):
+    chunks_formatted = []
+    for chunk in chunks:
+        d = {"path": '',
+             "text": chunk['text'],
+             "mediaType": "text",
+             "video_id": video_id,
+             "timestamp": int(chunk['start'] * 1000)}
+
+        chunks_formatted.append(d)
+
+    return chunks_formatted
+
+
+def file_to_base64(path: str) -> str:
+    """Helper function to convert a file to base64 representation."""
+    with open(path, 'rb') as file:
+        return base64.b64encode(file.read()).decode('utf-8')
+
+
+def audiosegment_to_base64(audio_segment: AudioSegment) -> str:
+    buffer = io.BytesIO()
+    audio_segment.export(buffer, format="wav")
+
+    return base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+
+def collect_frames(video_output_path: Path, video_id: str):
+    frames_path = Path(video_output_path / "frames/")
+    frame_metadata_path = Path(video_output_path / "frames_metadata.csv")
+
+    source = [f for f in os.listdir(frames_path) if f != '.DS_Store']
+    items = list()
+    frames_df = pd.read_csv(frame_metadata_path)
+
+    for name in source:
+        path = str(frames_path) + '/' + name
+
+        items.append({
+            "path": name,
+            "image": file_to_base64(path),
+            "mediaType": "image",
+            "video_id": video_id,
+            "timestamp": int(frames_df[frames_df['frame_id'] == name].timestamp_ms.values[0])
+        })
+
+    return items
+
+
+def collect_audio_chunks(video_output_path: Path, video_id: str, chunk_duration_ms: int):
+    audio = AudioSegment.from_wav(Path(video_output_path / "audio.wav"))
+    audio_chunks = []
+
+    for i in range(0, len(audio), chunk_duration_ms):
+        chunk = audio[i:i+chunk_duration_ms]
+        audio_chunks.append({
+            "path": f"chunk_{i}_{chunk_duration_ms}",
+            "audio": audiosegment_to_base64(chunk),
+            "mediaType": "audio",
+            "video_id": video_id,
+            "timestamp": i,
+        })
+
+    return audio_chunks
+
