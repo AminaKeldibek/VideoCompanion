@@ -37,6 +37,10 @@ class WeviateMultimodal:
         logging_utils.logger.info(f"is_read: {self.client.is_ready()}")
         logging_utils.logger.info(f"metadata: {self.client.get_meta()}")
 
+    def close_client(self):
+        if self.client:
+            self.client.close()
+
     def create_collection(self, collection_name: str):
         if self.client.collections.exists(collection_name):
             logging_utils.logger.info(f"Collection {collection_name} already exists")

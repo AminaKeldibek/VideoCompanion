@@ -1,44 +1,60 @@
-I. Data Pipeline
+# 🎥🔍 video_content_search
 
-Go to video_companion/video_content_search directory and run following to download audio in mp3 format and create
-transcription as json
+**video_content_search** is a multimodal search library that enables searching inside video content using **text**, **image**, or **audio** queries — and returns semantically relevant results from the transcript, screenshots, and soundbites of the video.
 
-1. `poetry run python video_content_search/extract_audio.py https://www.youtube.com/watch?v=so9Iy2gtKyg&t=4120s -o
-utput_path '../../data/'`
+It includes:
+- Data pipeline for prepare video modalities (images, text, audio) for inserting to vector store
+- A vector database interface for Weaviate (`WeviateMultimodal`)
+- Support for multimodal similarity search across text, image, and audio
+- A Gradio-powered web app for demoing and exploring the search results
 
-2. `poetry run python video_content_search/create_transcript.py "~/Projects/video_companion/data/audio/booking_event_small.mp3" -output_path="~/Projects/video_companion/data/transcription/booking_event_small.json"`
+---
 
-3.  `poetry run python video_content_search/add_documents.py ~/Projects/video_companion/data/transcription/booking_event.json`
+## ✨ Features
 
+- 🔤 Text-based semantic search across video transcripts
+- 🖼️ Image-based search for matching video frames
+- 🔊 Audio-based search for retrieving soundbites
+- ⏱️ Returns video ID and timestamp for all results
+- 🧠 Multimodal embedding and retrieval using Weaviate vector DB
 
-II. Backend
-1. Check that vector store is running from app in terminal
+---
 
-2. Start server use following command:
-`poetry run uvicorn main:app --reload`
+## 🚀 Demo App
 
-3. Test API
+### 🔧 Prerequisites
+
+- Python 3.9+
+- Weaviate running locally or remotely with multimodal objects loaded
+- Poetry
+
+### Run the App
+
 ```
-curl -X POST http://localhost:8000/search_video \
-     -H "Content-Type: application/json" \
-     -d '{
-           "video_id": "111_xxx",
-           "query": "комик из англии",
-           "user_id": "Sunshine"
-         }'
+cd gradio_app
+poetry run python app.py
 ```
 
+This launches a Gradio web UI where you can:
 
-III. Front End
-Front end create clickable Youtube URL for user
-https://www.youtube.com/watch?v=gg6-NuwKnmQ&t=10
-`https://www.youtube.com/watch?v=${data.video_id}&t=${data.timestamp}`;
+1. Enter text
+2. Upload an image
+3. Record or upload audio and
+4. get matching text/image/audio chunks from the video with their video_id and timestamp.
 
-IV. Integrate
 
-Examples of search queries to try:
-1. комик из англии
-2. Персонажи из мультиков
-3. мы не роботы
-4. Wallet
-5. Подарки
+🧠 How It Works
+When a user submits a query:
+
+* The app encodes it based on its modality (text/image/audio)
+* Queries Weaviate for top-k similar results across all 3 modalities
+* Decodes results (e.g., base64 images, audio bytes)
+* Displays them in Gradio, along with their metadata
+
+Each result includes:
+- Semantic similarity score 
+- Video ID 
+- Timestamp in the video
+
+
+
