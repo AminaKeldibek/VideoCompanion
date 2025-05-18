@@ -12,7 +12,6 @@ import video_content_search.search.multimodal_vector_store as mvs
 
 vs = mvs.WeviateMultimodal()
 vs.connect_to_client()
-atexit.register(vs.close_client)
 
 collection_name = "youtube"
 collection = vs.get_collection(collection_name)
@@ -143,29 +142,31 @@ def search_multimodal(text, image, audio):
     return text_results + images + image_metadata + audios + audio_metadata
 
 
-text_input = gr.Textbox(label="Text Input")
-image_input = gr.Image(type="pil", label="Image Input")
-audio_input = gr.Audio(type="numpy", label="Audio Input")
-
-text_input.change(
-    fn=lambda text, image, audio: handle_input_change(text, image, audio, "text"),
-    inputs=[text_input, image_input, audio_input],
-    outputs=[text_input, image_input, audio_input]
-)
-
-image_input.change(
-    fn=lambda text, image, audio: handle_input_change(text, image, audio, "image"),
-    inputs=[text_input, image_input, audio_input],
-    outputs=[text_input, image_input, audio_input]
-)
-
-audio_input.change(
-    fn=lambda text, image, audio: handle_input_change(text, image, audio, "audio"),
-    inputs=[text_input, image_input, audio_input],
-    outputs=[text_input, image_input, audio_input]
-)
-
 with gr.Blocks() as demo:
+    text_input = gr.Textbox(label="Text Input")
+    image_input = gr.Image(type="pil", label="Image Input")
+    audio_input = gr.Audio(type="numpy", label="Audio Input")
+
+    text_input.change(
+        fn=lambda text, image, audio: handle_input_change(text, image, audio, "text"),
+        inputs=[text_input, image_input, audio_input],
+        outputs=[text_input, image_input, audio_input]
+    )
+
+    image_input.change(
+        fn=lambda text, image, audio: handle_input_change(text, image, audio, "image"),
+        inputs=[text_input, image_input, audio_input],
+        outputs=[text_input, image_input, audio_input]
+    )
+
+    audio_input.change(
+        fn=lambda text, image, audio: handle_input_change(text, image, audio, "audio"),
+        inputs=[text_input, image_input, audio_input],
+        outputs=[text_input, image_input, audio_input]
+    )
+
+    btn = gr.Button("Search")
+
     with gr.Row():
         with gr.Column():
             gr.Markdown("### Text results")
@@ -181,8 +182,6 @@ with gr.Blocks() as demo:
             audio_outputs = [gr.Audio(type="filepath") for _ in range(num_results)]
             audio_metas = [gr.Textbox(label=f"Metadata {i+1}", interactive=False) for i in range(num_results)]
 
-    btn = gr.Button("Search")
-
     btn.click(
         fn=search_multimodal,
         inputs=[text_input, image_input, audio_input],
@@ -190,3 +189,4 @@ with gr.Blocks() as demo:
     )
 
 demo.launch()
+atexit.register(vs.close_client)

@@ -28,12 +28,25 @@ It includes:
 - Weaviate running locally or remotely with multimodal objects loaded
 - Poetry
 
-### Run the App
+▶️ Run the Gradio App
 
-```
-cd gradio_app
-poetry run python app.py
-```
+First, make sure the video_content_search package is available via Poetry.
+
+✅ 1. Install Dependencies
+bash
+Copy
+Edit
+poetry install
+This installs both the main package (video_content_search) and the Gradio app dependencies defined in pyproject.toml.
+
+🚀 2. Launch the App
+bash
+Copy
+Edit
+poetry run python app/gradio_app.py
+This will start the Gradio web interface where you can search using text, image, or audio, and view results retrieved from your Weaviate multimodal collection.
+
+
 
 This launches a Gradio web UI where you can:
 
