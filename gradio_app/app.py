@@ -15,6 +15,7 @@ vs.connect_to_client()
 collection_name = "youtube"
 collection = vs.get_collection(collection_name)
 
+num_results = 3
 
 def decode_base64_to_pil(b64_string: str) -> Image.Image:
     """Converts base64 image string to PIL.Image."""
@@ -46,6 +47,14 @@ def audio_tuple_to_base64(audio_tuple):
     wav_bytes = buffer.getvalue()
 
     return base64.b64encode(wav_bytes).decode('utf-8')
+
+
+def format_metadata(obj):
+    return (
+        f"\nSimilarity score: {obj.metadata.distance:.4f}"
+        f"\nVideo ID: {obj.properties.get('video_id', 'N/A')}"
+        f"\nTimestamp: {obj.properties.get('timestamp', 'N/A')}"
+    )
 
 
 def search_multimodal(text, image, audio):
@@ -85,24 +94,47 @@ def search_multimodal(text, image, audio):
         output_modality=mvs.Modality.AUDIO
     )
 
-    i = 0
-    return_text = "Result 1\n"
-    return_text = response_text.objects[i].properties['text']
-    return_text += f"\n similarity score: {response_text.objects[i].metadata.distance}"
-    return_text += f"\n video_id: {response_text.objects[i].properties['video_id']}"
-    return_text += f"\n timestamp: {response_text.objects[i].properties['timestamp']}"
+    text_results = []
+    images = []
+    image_metadata = []
+    audios = []
+    audio_metadata = []
 
-    return_image = decode_base64_to_pil(response_img.objects[i].properties['image'])
+    for i in range(num_results):
+        r = response_text.objects[i]
+        text_results.append(r.properties['text'] + format_metadata(r))
 
-    return_audio = decode_base64_to_audio_file(response_audio.objects[i].properties['audio'])
+        images.append(decode_base64_to_pil(response_img.objects[i].properties['image']))
+        image_metadata.append(format_metadata(response_img.objects[i]))
 
-    return return_text, return_image, return_audio
+        audios.append(decode_base64_to_audio_file(response_audio.objects[i].properties['audio']))
+        audio_metadata.append(format_metadata(response_audio.objects[i]))
+
+    return text_results + images + image_metadata + audios + audio_metadata
 
 
-demo = gr.Interface(
-    fn=search_multimodal,
-    inputs=["text", gr.Image(type="pil"), gr.Audio(type="numpy")],
-    outputs=["text", gr.Image(type="pil"), gr.Audio(type="filepath")],
-)
+with gr.Blocks() as demo:
+    with gr.Row():
+        with gr.Column():
+            gr.Markdown("### Text results")
+            text_boxes = [gr.Textbox(label=f"Result {i+1}") for i in range(num_results)]
+
+        with gr.Column():
+            gr.Markdown("### Image results")
+            img_outputs = [gr.Image(type="pil") for _ in range(num_results)]
+            img_metas = [gr.Textbox(label=f"Metadata {i+1}", interactive=False) for i in range(num_results)]
+
+        with gr.Column():
+            gr.Markdown("### Audio results")
+            audio_outputs = [gr.Audio(type="filepath") for _ in range(num_results)]
+            audio_metas = [gr.Textbox(label=f"Metadata {i+1}", interactive=False) for i in range(num_results)]
+
+    btn = gr.Button("Search")
+
+    btn.click(
+        fn=search_multimodal,
+        inputs=[gr.Textbox(), gr.Image(type="pil"), gr.Audio(type="numpy")],
+        outputs=text_boxes + img_outputs + img_metas + audio_outputs + audio_metas
+    )
 
 demo.launch()
