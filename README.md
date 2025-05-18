@@ -5,7 +5,7 @@
 It includes:
 - Data pipeline for prepare video modalities (images, text, audio) for inserting to vector store
 - A vector database interface for Weaviate (`WeviateMultimodal`)
-- Support for multimodal similarity search across text, image, and audio
+- Support for multimodal similarity search across text, image, and audio using ImageBind
 - A Gradio-powered web app for demoing and exploring the search results
 
 ---
