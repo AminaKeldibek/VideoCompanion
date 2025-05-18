@@ -2,16 +2,24 @@
 
 **video_content_search** is a multimodal search library that enables searching inside video content using **text**, **image**, or **audio** queries — and returns semantically relevant results from the transcript, screenshots, and soundbites of the video.
 
+---
+
 It includes:
-- Data pipeline for prepare video modalities (images, text, audio) for inserting to vector store
-- A vector database interface for Weaviate (`WeviateMultimodal`)
-- Support for multimodal similarity search across text, image, and audio using ImageBind
-- A Gradio-powered web app for demoing and exploring the search results
+
+* A data pipeline to prepare video modalities (images, text, audio) for insertion into a vector store
+* A vector database interface for Weaviate (`WeviateMultimodal`)
+* Support for multimodal similarity search across text, image, and audio using ImageBind
+* A Gradio-powered web app for demoing and exploring search results
+
+---
+
+Let me know if you want it more formal, concise, or detailed!
 
 ---
 
 ## ✨ Features
 
+- Parsing video into modalities (image, audio and text) and preparing each for vector store
 - 🔤 Text-based semantic search across video transcripts
 - 🖼️ Image-based search for matching video frames
 - 🔊 Audio-based search for retrieving soundbites
@@ -25,8 +33,12 @@ It includes:
 ### 🔧 Prerequisites
 
 - Python 3.9+
-- Weaviate running locally or remotely with multimodal objects loaded
 - Poetry
+- Weaviate running in docker
+- Imagebind running in docker
+- Whisper
+- Gradio
+
 
 ▶️ Run the Gradio App
 
